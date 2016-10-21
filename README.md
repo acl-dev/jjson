@@ -1,7 +1,7 @@
 # jjson
 mini json,one header file. easy to use. 
 
-jjson::obj_t vec;
+	jjson::obj_t vec;
 	jjson::json_t obj;
 	obj["str"] = "中国人";
 	obj["bool"] = false;
@@ -39,75 +39,75 @@ jjson::obj_t vec;
 
 	str = json2.to_string();
   
-  this json:
-  {
-    "obj1": {
-        "obj1": 1,
-        "obj2": false,
-        "obj3": 0.1,
-        "obj4": [
-            1,
-            false
-        ],
-        "obj5": {
-            "ob1": false,
-            "ob2": 1,
-            "ob3": {
-                "bool": false,
-                "float": 0.1,
-                "int": 12345,
-                "str": "中国人",
-                "vec": [
-                    1,
-                    2,
-                    3,
-                    4,
-                    "hello world",
-                    false,
-                    true,
-                    null,
-                    {
-                        "bool": false,
-                        "str": "中国人"
-                    },
-                    [
-                        1,
-                        false
-                    ]
-                ],
-                "vec1": [
-                    1,
-                    false
-                ]
-            }
-        }
-    },
-    "vec": {
-        "bool": false,
-        "float": 0.1,
-        "int": 12345,
-        "str": "中国人",
-        "vec": [
-            1,
-            2,
-            3,
-            4,
-            "hello world",
-            false,
-            true,
-            null,
-            {
-                "bool": false,
-                "str": "中国人"
-            },
-            [
-                1,
-                false
-            ]
-        ],
-        "vec1": [
-            1,
-            false
-        ]
-    }
-}
+	  this json:
+	  {
+	    "obj1": {
+		"obj1": 1,
+		"obj2": false,
+		"obj3": 0.1,
+		"obj4": [
+		    1,
+		    false
+		],
+		"obj5": {
+		    "ob1": false,
+		    "ob2": 1,
+		    "ob3": {
+			"bool": false,
+			"float": 0.1,
+			"int": 12345,
+			"str": "中国人",
+			"vec": [
+			    1,
+			    2,
+			    3,
+			    4,
+			    "hello world",
+			    false,
+			    true,
+			    null,
+			    {
+				"bool": false,
+				"str": "中国人"
+			    },
+			    [
+				1,
+				false
+			    ]
+			],
+			"vec1": [
+			    1,
+			    false
+			]
+		    }
+		}
+	    },
+	    "vec": {
+		"bool": false,
+		"float": 0.1,
+		"int": 12345,
+		"str": "中国人",
+		"vec": [
+		    1,
+		    2,
+		    3,
+		    4,
+		    "hello world",
+		    false,
+		    true,
+		    null,
+		    {
+			"bool": false,
+			"str": "中国人"
+		    },
+		    [
+			1,
+			false
+		    ]
+		],
+		"vec1": [
+		    1,
+		    false
+		]
+	    }
+	}
