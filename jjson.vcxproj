@@ -110,10 +110,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="example.cpp" />
+    <ClInclude Include="jjson.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="jjson.hpp" />
+    <ClCompile Include="test\example.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
