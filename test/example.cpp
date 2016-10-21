@@ -1,11 +1,11 @@
 #include "jjson.hpp"
+#include <thread>
 jjson::json_t json1, json2;
 std::string str;
 
 int test_parse()
 {
-	int pos = 0;
-	jjson::json_t *json = jjson::get_json(pos, str.size(),str.c_str());
+	jjson::json_t *json = jjson::build_json(str);
 	delete json;
 	return 0;
 }
@@ -15,7 +15,12 @@ void test_get()
 	assert(json1["int"].get<int>() == 12345);
 	assert(json1["bool"].get<bool>() == false);
 	assert(json1["float"].type() == jjson::e_float);
-	assert(json1["vec"].get(4).get<std::string>() == "hello world");
+	assert(json1["vec"].get<std::string>(4) == "hello world");
+	assert(json1["vec"].get<bool>(5) == false);
+	assert(json1["vec"].get<bool>(6) == true);
+	assert(json1["vec"].get(7).is_null());
+	assert(json1["vec"].get(8)["str"].get<std::string>() == "ÖÐ¹úÈË");
+	assert(json1["vec"].get(8)["bool"].get<bool>() == false);
 	assert(json2["obj1"]["obj5"]["ob2"].get<int>() == 1);
 
 }
@@ -57,13 +62,26 @@ void test_init()
 	json2["obj1"]["obj5"]["ob2"] = 1;
 	json2["obj1"]["obj5"]["ob3"] = json1;
 
-	str = json2.to_string();
+	str = json1.to_string();
 }
 int main()
 {
 	test_init();
-	test_get();
-	test_parse();
+	//test_get();
 	int64_t i = 0;
-	int64_t last = 0;
+	int64_t lasti = 0;
+	int len = str.size();
+	std::thread timer([&] { 
+		while(true)
+		{
+			std::this_thread::sleep_for(std::chrono::seconds(1));
+			std::cout << ((i - lasti) * len)/1024/1024 <<" MB"<<std::endl;
+			lasti = i;
+		}
+	});
+	while(true)
+	{
+		i++;
+		test_get();
+	}
 }

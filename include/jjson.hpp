@@ -250,12 +250,24 @@ namespace jjson
 			assert(type_ == e_str);
 			return *val_.str_;
 		}
+		template<typename T>
+		T get(std::size_t idx)
+		{
+			assert(type_ == e_vec);
+			assert(val_.vec_);
+			assert(idx < val_.vec_->size());
+			return ((*val_.vec_)[idx])->get<T>();
+		}
 		obj_t &get(std::size_t idx)
 		{
 			assert(type_ == e_vec);
 			assert(val_.vec_);
 			assert(idx < val_.vec_->size());
 			return *((*val_.vec_)[idx]);
+		}
+		bool is_null()
+		{
+			return type_ == e_null;
 		}
 		std::size_t len()
 		{
@@ -658,5 +670,19 @@ namespace jjson
 	fail:
 		delete json_ptr;
 		return NULL;
+	}
+	json_t *build_json(const std::string &str)
+	{
+		int pos = 0;
+		return get_json(pos, (int)str.size(), str.c_str());
+	}
+	json_t *build_json(const char *str)
+	{
+		int pos = 0;
+		return get_json(pos, (int)strlen(str), str);
+	}
+	void destory_json(json_t *json)
+	{
+		delete json;
 	}
 }
