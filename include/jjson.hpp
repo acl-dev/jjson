@@ -354,332 +354,356 @@ namespace jjson
 		str += "}";
 		return str;
 	}
-	static inline void skip_space(int &pos, int len, const char * str)
+	namespace json_parser
 	{
-		assert(len > 0);
-		assert(pos >= 0);
-		assert(pos < len);
-
-		while (pos < len &&
-			(str[pos] == ' ' ||
-				str[pos] == '\r' ||
-				str[pos] == '\n' ||
-				str[pos] == '\t'))
-			++pos;
-	}
-	static inline std::pair<bool, std::string> get_text(int &pos, int len, const char *str)
-	{
-		assert(len > 0);
-		assert(pos >= 0);
-		assert(pos < len);
-		assert(str[pos] == '"');
-
-		std::string key;
-		++pos;
-		while (pos < len)
+		static inline bool 
+			skip_space(int &pos, int len, const char * str)
 		{
-			if (str[pos] != '"')
-				key.push_back(str[pos]);
-			else if (key.size() && key.back() == '\\')
-				key.push_back(str[pos]);
-			else
-			{
+			assert(len > 0);
+			assert(pos >= 0);
+			assert(pos < len);
+
+			while(pos < len &&
+				(str[pos] == ' ' ||
+				  str[pos] == '\r' ||
+				  str[pos] == '\n' ||
+				  str[pos] == '\t'))
 				++pos;
-				return{ true, key };
-			}
-			++pos;
-		}
-		return{ false,"" };
-	}
-	static int get_bool(int &pos, int len, const char *str)
-	{
-		assert(len > 0);
-		assert(pos >= 0);
-		assert(pos < len);
-		assert(str[pos] == 't' || str[pos] == 'f');
-		std::string key;
 
-		while (pos < len)
-		{
-			if (isalpha(str[pos]))
-				key.push_back(str[pos]);
-			else
-				break;
-			++pos;
+			return pos < len;
 		}
-		if (key == "true")
-			return 1;
-		else if (key == "false")
-			return 0;
-		return -1;
-	}
-	static inline bool get_null(int &pos, int len, const char *str)
-	{
-		assert(len > 0);
-		assert(pos >= 0);
-		assert(pos < len);
-		assert(str[pos] == 'n');
-		std::string null;
+		static inline std::pair<bool, std::string>
+			get_text(int &pos, int len, const char *str)
+		{
+			assert(len > 0);
+			assert(pos >= 0);
+			assert(pos < len);
+			assert(str[pos] == '"');
 
-		while (pos < len)
-		{
-			if (isalpha(str[pos]))
-				null.push_back(str[pos]);
-			else
-				break;
+			std::string key;
 			++pos;
-		}
-		if (null == "null")
-			return true;
-		return false;
-	}
-	static inline std::string get_num(bool &sym, int &pos, int len, const char *str)
-	{
-		sym = false;
-		std::string tmp;
-		while (pos < len)
-		{
-			if (str[pos] >= '0' &&str[pos] <= '9')
+			while(pos < len)
 			{
-				tmp.push_back(str[pos]);
-				++pos;
-			}
-			else if (str[pos] == '.')
-			{
-				tmp.push_back(str[pos]);
-				++pos;
-				if (sym == false)
-					sym = true;
+				if(str[pos] != '"')
+					key.push_back(str[pos]);
+				else if(key.size() && key.back() == '\\')
+					key.push_back(str[pos]);
 				else
-					return false;
-			}
-			else
-				break;
-		}
-		return tmp;
-	}
-
-	static inline json_t *get_json(int &pos, int len, const char * str);
-	static inline obj_t* get_vec(int &pos, int len, const char *str)
-	{
-		obj_t *vec = new obj_t;
-		if (str[pos] == '[')
-			pos++;
-		while (pos < len)
-		{
-			switch (str[pos])
-			{
-			case ']':
-				++pos;
-				return vec;
-			case '[':
-			{
-				obj_t * obj = get_vec(pos, len, str);
-				if (!!!obj)
-					goto fail;
-				vec->add(obj);
-				break;
-			}
-			case '"':
-			{
-				std::pair<bool, std::string > res = get_text(pos, len, str);
-				if (res.first == false)
-					goto fail;
-				vec->add(res.second);
-				break;
-			}
-			case 'n':
-				if (get_null(pos, len, str))
 				{
-					vec->add(null);
+					++pos;
+					return{ true, key };
+				}
+				++pos;
+			}
+			return{ false,"" };
+		}
+		static int get_bool(int &pos, int len, const char *str)
+		{
+			assert(len > 0);
+			assert(pos >= 0);
+			assert(pos < len);
+			assert(str[pos] == 't' || str[pos] == 'f');
+			std::string key;
+
+			while(pos < len)
+			{
+				if(isalpha(str[pos]))
+					key.push_back(str[pos]);
+				else
+					break;
+				++pos;
+			}
+			if(key == "true")
+				return 1;
+			else if(key == "false")
+				return 0;
+			return -1;
+		}
+		static inline bool get_null(int &pos, int len, const char *str)
+		{
+			assert(len > 0);
+			assert(pos >= 0);
+			assert(pos < len);
+			assert(str[pos] == 'n');
+			std::string null;
+
+			while(pos < len)
+			{
+				if(isalpha(str[pos]))
+					null.push_back(str[pos]);
+				else
+					break;
+				++pos;
+			}
+			if(null == "null")
+				return true;
+			return false;
+		}
+		static inline std::string get_num(
+			bool &sym, int &pos,int len, const char *str)
+		{
+			sym = false;
+			std::string tmp;
+			while(pos < len)
+			{
+				if(str[pos] >= '0' &&str[pos] <= '9')
+				{
+					tmp.push_back(str[pos]);
+					++pos;
+				}
+				else if(str[pos] == '.')
+				{
+					tmp.push_back(str[pos]);
+					++pos;
+					if(sym == false)
+						sym = true;
+					else
+						return false;
+				}
+				else
+					break;
+			}
+			return tmp;
+		}
+
+		static inline json_t *get_json(int &pos, int len, const char * str);
+		static inline obj_t* get_vec(int &pos, int len, const char *str)
+		{
+			obj_t *vec = new obj_t;
+			if(str[pos] == '[')
+				pos++;
+			while(pos < len)
+			{
+				switch(str[pos])
+				{
+				case ']':
+					++pos;
+					return vec;
+				case '[':
+				{
+					obj_t * obj = get_vec(pos, len, str);
+					if(!!!obj)
+						goto fail;
+					vec->add(obj);
 					break;
 				}
-			case '{':
-			{
-				json_t *json = get_json(pos, len, str);
-				if (!!!json)
-					goto fail;
-				vec->add(json);
-				break;
-			}
-			case 'f':
-			case 't':
-			{
-				int b = get_bool(pos, len, str);
-				if (b == 0)
-					vec->add(false);
-				else if (b == 1)
-					vec->add(true);
-				else
-					goto fail;
-				break;
-			}
-			case ',':
-			case ' ':
-			case '\r':
-			case '\n':
-			case '\t':
-				++pos;
-				break;
-			default:
-				if (str[pos] == '-' || str[pos] >= '0' && str[pos] <= '9')
+				case '"':
 				{
-					bool is_float = false;
-					std::string tmp = get_num(is_float, pos, len, str);
-					errno = 0;
-					if (is_float)
+					std::pair<bool, std::string > res = get_text(pos, len, str);
+					if(res.first == false)
+						goto fail;
+					vec->add(res.second);
+					break;
+				}
+				case 'n':
+					if(get_null(pos, len, str))
 					{
-						double d = std::strtod(tmp.c_str(), 0);
-						if (errno == ERANGE)
-							goto fail;
-						vec->add(d);
+						vec->add(null);
+						break;
 					}
+				case '{':
+				{
+					json_t *json = get_json(pos, len, str);
+					if(!!!json)
+						goto fail;
+					vec->add(json);
+					break;
+				}
+				case 'f':
+				case 't':
+				{
+					int b = get_bool(pos, len, str);
+					if(b == 0)
+						vec->add(false);
+					else if(b == 1)
+						vec->add(true);
 					else
+						goto fail;
+					break;
+				}
+				case ',':
+				case ' ':
+				case '\r':
+				case '\n':
+				case '\t':
+					++pos;
+					break;
+				default:
+					if(str[pos] == '-' || str[pos] >= '0' && str[pos] <= '9')
 					{
-						int64_t val = std::strtoll(tmp.c_str(), 0, 10);
-						if (errno == ERANGE)
-							goto fail;
-						vec->add(val);
+						bool is_float = false;
+						std::string tmp = get_num(is_float, pos, len, str);
+						errno = 0;
+						if(is_float)
+						{
+							double d = std::strtod(tmp.c_str(), 0);
+							if(errno == ERANGE)
+								goto fail;
+							vec->add(d);
+						}
+						else
+						{
+							int64_t val = std::strtoll(tmp.c_str(), 0, 10);
+							if(errno == ERANGE)
+								goto fail;
+							vec->add(val);
+						}
 					}
 				}
 			}
+
+		fail:
+			delete vec;
+			return NULL;
 		}
 
-	fail:
-		delete vec;
-		return NULL;
-	}
+#define check_ahead(ch)\
+do{\
+		if(!skip_space(pos, len, str))\
+			goto fail; \
+			if(str[pos] != ch)\
+				goto fail;\
+} while(0)
 
-	static inline json_t *get_json(int &pos, int len, const char * str)
-	{
-		json_t *json_ptr = new json_t;
-		json_t &json = *json_ptr;
-		std::string key;
-
-		skip_space(pos, len, str);
-		if (pos >= len)
-			goto fail;
-		if (str[pos] == '{')
-			++pos;
-		else
-			goto fail;
-		while (pos < len)
+		static inline json_t *get_json(int &pos, int len, const char * str)
 		{
-			switch (str[pos])
+			json_t *json_ptr = new json_t;
+			json_t &json = *json_ptr;
+			std::string key;
+
+			skip_space(pos, len, str);
+			if(pos >= len)
+				goto fail;
+			if(str[pos] == '{')
+				++pos;
+			else
+				goto fail;
+			while(pos < len)
 			{
-			case '"':
-			{
-				std::pair<bool, std::string > res = get_text(pos, len, str);
-				if (res.first == false)
-					goto fail;
-				if (key.empty())
-					key = res.second;
-				else
+				switch(str[pos])
 				{
-					json[key] = res.second;
-					key.clear();
-				}
-				break;
-			}
-			case 'f':
-			case 't':
-			{
-				if (key.empty())
-					goto fail;
-				int b = get_bool(pos, len, str);
-				if (b == 0)
-					json[key] = false;
-				else if (b == 1)
-					json[key] = true;
-				else
-					goto fail;
-				key.clear();
-				break;
-			}
-			case 'n':
-			{
-				if (key.empty() || get_null(pos, len, str) == false)
-					goto fail;
-				json[key] = null;
-			}
-			case '{':
-			{
-				if (key.empty())
-					goto fail;
-				json_t *obj = get_json(pos, len, str);
-				if (obj == NULL)
-					goto fail;
-				json[key] = obj;
-				key.clear();
-				break;
-			}
-			case '}':
-				if (key.size())
-					goto fail;
-				++pos;
-				return json_ptr;
-			case ':':
-			{
-				if (key.empty())
-					goto fail;
-				++pos;
-				break;
-			}
-			case ',':
-			case ' ':
-			case '\r':
-			case '\n':
-			case '\t':
-				++pos;
-				break;
-			case '[':
-			{
-				obj_t *vec = get_vec(pos, len, str);
-				if (!!!vec || key.empty())
-					goto fail;
-				json.add(key, vec);
-				key.clear();
-				break;
-			}
-			default:
-				if (str[pos] == '-' || str[pos] >= '0' && str[pos] <= '9')
+				case '"':
 				{
-					bool is_float = false;
-					std::string tmp = get_num(is_float, pos, len, str);
-					errno = 0;
-					if (is_float)
+					std::pair<bool, std::string > res = get_text(pos, len, str);
+					if(res.first == false)
+						goto fail;
+					if(key.empty())
 					{
-						double d = std::strtod(tmp.c_str(), 0);
-						if (errno == ERANGE)
-							return false;
-						json[key] = d;
-						key.clear();
+						key = res.second;
+						check_ahead(':');
 					}
 					else
 					{
-						int64_t val = std::strtoll(tmp.c_str(), 0, 10);
-						if (errno == ERANGE)
-							return false;
-						json[key] = val;
+						json[key] = res.second;
 						key.clear();
+					}
+					break;
+				}
+				case 'f':
+				case 't':
+				{
+					if(key.empty())
+						goto fail;
+					int b = get_bool(pos, len, str);
+					if(b == 0)
+						json[key] = false;
+					else if(b == 1)
+						json[key] = true;
+					else
+						goto fail;
+					key.clear();
+					break;
+				}
+				case 'n':
+				{
+					if(key.empty() || get_null(pos, len, str) == false)
+						goto fail;
+					json[key] = null;
+				}
+				case '{':
+				{
+					if(key.empty())
+						goto fail;
+					json_t *obj = get_json(pos, len, str);
+					if(obj == NULL)
+						goto fail;
+					json[key] = obj;
+					key.clear();
+					break;
+				}
+				case '}':
+					if(key.size())
+						goto fail;
+					++pos;
+					return json_ptr;
+				case ':':
+				{
+					if(key.empty())
+						goto fail;
+					++pos;
+					break;
+				}
+				case ',':
+				{
+					++pos;
+					check_ahead('"');
+					break;
+				}
+				case ' ':
+				case '\r':
+				case '\n':
+				case '\t':
+					++pos;
+					break;
+				case '[':
+				{
+					obj_t *vec = get_vec(pos, len, str);
+					if(!!!vec || key.empty())
+						goto fail;
+					json.add(key, vec);
+					key.clear();
+					break;
+				}
+				default:
+					if(str[pos] == '-' || str[pos] >= '0' && str[pos] <= '9')
+					{
+						bool is_float = false;
+						std::string tmp = get_num(is_float, pos, len, str);
+						errno = 0;
+						if(is_float)
+						{
+							double d = std::strtod(tmp.c_str(), 0);
+							if(errno == ERANGE)
+								return false;
+							json[key] = d;
+							key.clear();
+						}
+						else
+						{
+							int64_t val = std::strtoll(tmp.c_str(), 0, 10);
+							if(errno == ERANGE)
+								return false;
+							json[key] = val;
+							key.clear();
+						}
 					}
 				}
 			}
-		}
 
-	fail:
-		delete json_ptr;
-		return NULL;
+		fail:
+			delete json_ptr;
+			return NULL;
+		}
 	}
 	json_t *build_json(const std::string &str)
 	{
 		int pos = 0;
-		return get_json(pos, (int)str.size(), str.c_str());
+		return json_parser::get_json(pos, (int)str.size(), str.c_str());
 	}
 	json_t *build_json(const char *str)
 	{
 		int pos = 0;
-		return get_json(pos, (int)strlen(str), str);
+		return json_parser::get_json(pos, (int)strlen(str), str);
 	}
 	void destory_json(json_t *json)
 	{
